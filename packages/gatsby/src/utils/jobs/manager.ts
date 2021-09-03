@@ -162,7 +162,7 @@ function runJob(
 ): Promise<Record<string, unknown>> {
   const { plugin } = job
   try {
-    const worker = requireGatsbyPlugin(plugin, `gatsby-worker`)
+    const worker = requireGatsbyPlugin(plugin, `gatsby-worker.js`)
     if (!worker[job.name]) {
       throw new Error(`No worker function found for ${job.name}`)
     }
@@ -187,6 +187,7 @@ function runJob(
     }
     return runLocalWorker(worker[job.name], job)
   } catch (err) {
+    console.log(err)
     throw new Error(
       `We couldn't find a gatsby-worker.js(${plugin.resolve}/gatsby-worker.js) file for ${plugin.name}@${plugin.version}`
     )

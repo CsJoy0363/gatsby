@@ -1,3 +1,5 @@
+import { requireResolve } from "./require-utils"
+
 const pluginModuleCache = new Map<string, any>()
 
 export function setGatsbyPluginCache(
@@ -17,7 +19,7 @@ export function requireGatsbyPlugin(
 
   let pluginModule = pluginModuleCache.get(key)
   if (!pluginModule) {
-    pluginModule = require(require.resolve(`${plugin.resolve}/${module}`))
+    pluginModule = require(requireResolve(`${plugin.resolve}/${module}`))
     pluginModuleCache.set(key, pluginModule)
   }
   return pluginModule

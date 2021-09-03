@@ -36,6 +36,17 @@ jest.mock(
   { virtual: true }
 )
 
+jest.mock(`../../require-utils`, () => {
+  return {
+    requireResolve(id) {
+      // Just pass through for tests.
+      // require.resolve is not using jest mocks ( https://github.com/facebook/jest/issues/9543 ), so instead we use
+      // this wrapper so we can mock a wrapper
+      return id
+    },
+  }
+})
+
 jest.mock(`uuid/v4`, () =>
   jest.fn().mockImplementation(jest.requireActual(`uuid/v4`))
 )
@@ -158,14 +169,14 @@ describe(`Jobs manager`, () => {
   })
 
   describe(`enqueueJob`, () => {
-    it(`should schedule a job`, async () => {
+    it.only(`should schedule a job`, async () => {
       const { enqueueJob } = jobManager
       worker.TEST_JOB.mockReturnValue({ output: `myresult` })
       worker.NEXT_JOB = jest.fn().mockReturnValue({ output: `another result` })
-      const mockedJob = createInternalMockJob()
+      const mockedJob = await createInternalMockJob()
       const job1 = enqueueJob(mockedJob)
       const job2 = enqueueJob(
-        createInternalMockJob({
+        await createInternalMockJob({
           inputPaths: [],
           name: `NEXT_JOB`,
         })
