@@ -1,6 +1,5 @@
 require(`v8-compile-cache`)
 
-const { isCI } = require(`gatsby-core-utils`)
 const crypto = require(`crypto`)
 const fs = require(`fs-extra`)
 const path = require(`path`)
@@ -22,6 +21,7 @@ import { StaticQueryMapper } from "./webpack/static-query-mapper"
 import { ForceCssHMRForEdgeCases } from "./webpack/force-css-hmr-for-edge-cases"
 import { hasES6ModuleSupport } from "./browserslist"
 import { builtinModules } from "module"
+import webpack from "webpack"
 const { BabelConfigItemsCacheInvalidatorPlugin } = require(`./babel-loader`)
 
 const FRAMEWORK_BUNDLES = [`react`, `react-dom`, `scheduler`, `prop-types`]
@@ -154,9 +154,12 @@ module.exports = async (
         // Generate the file needed to SSR pages.
         // Deleted by build-html.js, since it's not needed for production.
         return {
-          path: directoryPath(`public`),
-          filename: `render-page.js`,
-          libraryTarget: `commonjs`,
+          path: directoryPath(`.cache`, `_routes`),
+          filename: `[name].js`,
+          chunkFilename: `[name].js`,
+          library: {
+            type: `commonjs`,
+          },
           publicPath: withTrailingSlash(publicPath),
         }
       case `build-javascript`:
@@ -184,14 +187,15 @@ module.exports = async (
             }
       case `develop-html`:
         return {
-          main: process.env.GATSBY_EXPERIMENTAL_DEV_SSR
+          "render-page": process.env.GATSBY_EXPERIMENTAL_DEV_SSR
             ? directoryPath(`.cache/ssr-develop-static-entry`)
             : directoryPath(`.cache/develop-static-entry`),
         }
-      case `build-html`:
+      case `build-html`: {
         return {
-          main: directoryPath(`.cache/static-entry`),
+          "render-page": directoryPath(`.cache/static-entry`),
         }
+      }
       case `build-javascript`:
         return hasES6ModuleSupport(directory)
           ? {
@@ -571,6 +575,12 @@ module.exports = async (
 
   if (stage === `build-html`) {
     config.optimization = {
+      splitChunks: {
+        cacheGroups: {
+          default: false,
+          defaultVendors: false,
+        },
+      },
       minimize: false,
     }
   }

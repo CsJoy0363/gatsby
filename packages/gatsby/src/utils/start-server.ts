@@ -517,7 +517,7 @@ module.exports = {
           page: pathObj,
           skipSsr: req.query[`skip-ssr`] || false,
           store,
-          htmlComponentRendererPath: `${program.directory}/public/render-page.js`,
+          htmlComponentRendererPath: `${program.directory}/.cache/_routes/render-page.js`,
           directory: program.directory,
         })
         res.status(200).send(renderResponse)
@@ -586,7 +586,7 @@ module.exports = {
             skipSsr: true,
             store,
             error: message,
-            htmlComponentRendererPath: `${program.directory}/public/render-page.js`,
+            htmlComponentRendererPath: `${program.directory}/.cache/_routes/render-page.js`,
             directory: program.directory,
           })
 
